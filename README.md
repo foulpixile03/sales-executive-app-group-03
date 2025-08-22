@@ -1,0 +1,2 @@
+# sales-executive-app-group-07
+A full-stack Sales Executive Management Application built with Spring Boot and React, designed to help sales teams manage leads, track performance.
