@@ -14,9 +14,11 @@ import {
   MessageSquare,
   Calendar
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +44,7 @@ const Dashboard = () => {
                   <Home className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white" onClick={() => navigate('/analytics')}>
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics
                 </Button>

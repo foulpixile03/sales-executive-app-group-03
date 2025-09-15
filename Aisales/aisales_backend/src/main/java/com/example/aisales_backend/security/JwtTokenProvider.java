@@ -1,26 +1,31 @@
 package com.example.aisales_backend.security;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Slf4j
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:defaultSecretKeyForDevelopmentOnly}")
+    @Value("${security.jwt.secret:defaultSecretKeyForDevelopmentOnly}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
+    @Value("${security.jwt.expiration-ms:86400000}") // 24 hours in milliseconds
     private long expiration;
 
     private SecretKey getSigningKey() {
