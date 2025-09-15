@@ -9,9 +9,22 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import ChatBot from "./pages/ChatBot"; // Add this import
+import ChatBot from "./pages/ChatBot";
+import Analytics from "./pages/Analytics";
+import SentimentAnalysis from "./pages/SentimentAnalysis";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+const AppLayout = ({ children }) => (
+  <div className="min-h-screen bg-background">{children}</div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -20,29 +33,46 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            {/* Add ChatBot route with protected route wrapper */}
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <ChatBot orderId="111" />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <ChatBot orderId="123" />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sentiment-analysis"
+                element={
+                  <ProtectedRoute>
+                    <SentimentAnalysis />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppLayout>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

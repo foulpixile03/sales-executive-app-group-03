@@ -1,9 +1,9 @@
-package com.example.finsight_backend.controller;
+package com.example.aisales_backend.controller;
 
 
-import com.example.finsight_backend.dto.chat.ChatRequestDto;
-import com.example.finsight_backend.dto.chat.ChatResponseDto;
-import com.example.finsight_backend.service.interfaces.IChatService;
+import com.example.aisales_backend.dto.chat.ChatRequestDto;
+import com.example.aisales_backend.dto.chat.ChatResponseDto;
+import com.example.aisales_backend.service.interfaces.IChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

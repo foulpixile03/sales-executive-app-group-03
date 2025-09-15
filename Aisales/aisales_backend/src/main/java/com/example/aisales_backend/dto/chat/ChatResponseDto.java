@@ -1,4 +1,4 @@
-package com.example.finsight_backend.dto.chat;
+package com.example.aisales_backend.dto.chat;
 
 public class ChatResponseDto {
     private String answer;

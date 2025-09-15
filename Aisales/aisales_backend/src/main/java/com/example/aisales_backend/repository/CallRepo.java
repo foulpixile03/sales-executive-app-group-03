@@ -1,6 +1,6 @@
-package com.example.finsight_backend.repository;
+package com.example.aisales_backend.repository;
 
-import com.example.finsight_backend.entity.CallRecording;
+import com.example.aisales_backend.entity.CallRecording;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

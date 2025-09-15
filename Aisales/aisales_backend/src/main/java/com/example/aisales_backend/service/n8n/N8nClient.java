@@ -1,4 +1,4 @@
-package com.example.finsight_backend.service.n8n;
+package com.example.aisales_backend.service.n8n;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;

@@ -1,9 +1,9 @@
-package com.example.finsight_backend.service.implement;
+package com.example.aisales_backend.service.implement;
 
-import com.example.finsight_backend.dto.chat.ChatRequestDto;
-import com.example.finsight_backend.dto.chat.ChatResponseDto;
-import com.example.finsight_backend.service.interfaces.IChatService;
-import com.example.finsight_backend.service.n8n.N8nWebhookService;
+import com.example.aisales_backend.dto.chat.ChatRequestDto;
+import com.example.aisales_backend.dto.chat.ChatResponseDto;
+import com.example.aisales_backend.service.interfaces.IChatService;
+import com.example.aisales_backend.service.n8n.N8nWebhookService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

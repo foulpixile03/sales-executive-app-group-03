@@ -1,7 +1,7 @@
-package com.example.finsight_backend.service.n8n;
+package com.example.aisales_backend.service.n8n;
 
-import com.example.finsight_backend.entity.CallRecording;
-import com.example.finsight_backend.repository.CallRepo;
+import com.example.aisales_backend.entity.CallRecording;
+import com.example.aisales_backend.repository.CallRepo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

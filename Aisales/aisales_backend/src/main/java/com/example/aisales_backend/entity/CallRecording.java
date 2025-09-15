@@ -1,4 +1,4 @@
-package com.example.finsight_backend.entity;
+package com.example.aisales_backend.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
