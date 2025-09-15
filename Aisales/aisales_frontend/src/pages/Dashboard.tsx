@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Target, 
+import {
+  Target,
   LogOut,
   User,
   Settings,
@@ -14,9 +14,11 @@ import {
   MessageSquare,
   Calendar
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,7 +37,7 @@ const Dashboard = () => {
                   <p className="text-white/80 text-sm">AI Sales Executive</p>
                 </div>
               </div>
-              
+
               {/* Navigation Menu */}
               <nav className="hidden md:flex items-center space-x-1">
                 <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 hover:text-white">
@@ -54,13 +56,18 @@ const Dashboard = () => {
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Messages
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:bg-white/20 hover:text-white"
+                  onClick={() => navigate('/chat')}
+                >
                   <Calendar className="h-4 w-4 mr-2" />
-                  Calendar
+                  ChatBot
                 </Button>
               </nav>
             </div>
-            
+
             {/* Right Section */}
             <div className="flex items-center space-x-4">
               {/* Notifications */}
@@ -68,12 +75,12 @@ const Dashboard = () => {
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
               </Button>
-              
+
               {/* Settings */}
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                 <Settings className="h-5 w-5" />
               </Button>
-              
+
               {/* User Profile */}
               <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
                 <div className="text-right">
@@ -85,16 +92,16 @@ const Dashboard = () => {
                 <div className="bg-white/20 p-2 rounded-full">
                   <User className="h-5 w-5 text-white" />
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={logout}
                   className="text-white/80 hover:bg-white/20 hover:text-white"
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               {/* Mobile Menu Button */}
               <Button variant="ghost" size="sm" className="md:hidden text-white hover:bg-white/20">
                 <Menu className="h-5 w-5" />
@@ -115,7 +122,7 @@ const Dashboard = () => {
               Welcome back, {user?.firstName}!
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Welcome to Vocalyx - your AI-powered sales executive platform. 
+              Welcome to Vocalyx - your AI-powered sales executive platform.
               Ready to boost your sales performance with intelligent insights and automation.
             </p>
           </div>
