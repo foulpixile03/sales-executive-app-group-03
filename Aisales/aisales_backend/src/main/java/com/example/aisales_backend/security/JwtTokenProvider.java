@@ -17,10 +17,10 @@ import java.util.function.Function;
 @Slf4j
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:defaultSecretKeyForDevelopmentOnly}")
+    @Value("${security.jwt.secret:defaultSecretKeyForDevelopmentOnly}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
+    @Value("${security.jwt.expiration-ms:86400000}") // 24 hours in milliseconds
     private long expiration;
 
     private SecretKey getSigningKey() {
@@ -29,6 +29,12 @@ public class JwtTokenProvider {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, userDetails.getUsername());
+    }
+
+    public String generateTokenWithUserId(UserDetails userDetails, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
         return createToken(claims, userDetails.getUsername());
     }
 
@@ -49,6 +55,11 @@ public class JwtTokenProvider {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", Long.class);
     }
 
     public Date extractExpiration(String token) {
