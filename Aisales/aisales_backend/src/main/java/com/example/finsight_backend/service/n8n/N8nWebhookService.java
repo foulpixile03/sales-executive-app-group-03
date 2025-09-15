@@ -1,7 +1,7 @@
 package com.example.finsight_backend.service.n8n;
 
 import com.example.finsight_backend.entity.CallRecording;
-import com.example.finsight_backend.repository.CallRepository;
+import com.example.finsight_backend.repository.CallRepo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +17,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @Slf4j
 public class N8nWebhookService {
     private final N8nClient n8nClient;
-    private final CallRepository callRepository;
+    private final CallRepo callRepo;
 
-    public N8nWebhookService(N8nClient n8nClient, CallRepository callRepository) {
+    public N8nWebhookService(N8nClient n8nClient, CallRepo callRepo) {
         this.n8nClient = n8nClient;
-        this.callRepository = callRepository;
+        this.callRepo = callRepo;
     }
 
 
     public String triggerForOrder(String orderId, String question) {
-        CallRecording rec = callRepository.findTopByOrderIdOrderByCreatedAtDesc(orderId)
+        CallRecording rec = callRepo.findTopByOrderIdOrderByCreatedAtDesc(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("No call recording for order: " + orderId));
 
         Map<String, Object> payload = new HashMap<>();
