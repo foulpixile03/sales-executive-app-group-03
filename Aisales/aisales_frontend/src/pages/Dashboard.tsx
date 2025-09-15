@@ -44,13 +44,18 @@ const Dashboard = () => {
                   <Home className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white" onClick={() => navigate('/analytics')}>
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white/80 hover:bg-white/20 hover:text-white"
+                  onClick={() => window.location.href = '/sentiment-analysis'}
+                >
                   <Users className="h-4 w-4 mr-2" />
-                  Leads
+                  Sentiment
                 </Button>
                 <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
                   <MessageSquare className="h-4 w-4 mr-2" />
