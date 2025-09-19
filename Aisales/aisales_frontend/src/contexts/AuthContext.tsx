@@ -8,6 +8,7 @@ interface User {
   email: string;
   role: string;
   createdAt: string;
+  workspaceId?: number | null;
 }
 
 interface AuthContextType {
@@ -78,13 +79,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Decode JWT to get user info (basic decoding - in production use a proper JWT library)
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const userData = {
+      const userData: User = {
         id: payload.userId || 0,
         firstName: payload.firstName || '',
         lastName: payload.lastName || '',
         email: payload.sub || email,
         role: payload.role || 'USER',
         createdAt: new Date().toISOString(),
+        workspaceId: typeof payload.workspaceId === 'number' ? payload.workspaceId : (payload.workspaceId ?? null),
       };
 
       setToken(token);
@@ -93,7 +95,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('finsight_token', token);
       localStorage.setItem('finsight_user', JSON.stringify(userData));
       
-      navigate('/dashboard');
+      if (userData.role === 'ADMIN' && (userData.workspaceId === null || userData.workspaceId === undefined)) {
+        navigate('/workspace-setup');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       throw error;
     } finally {

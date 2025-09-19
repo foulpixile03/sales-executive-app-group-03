@@ -12,6 +12,9 @@ import NotFound from "./pages/NotFound";
 import ChatBot from "./pages/ChatBot";
 import Analytics from "./pages/Analytics";
 import SentimentAnalysis from "./pages/SentimentAnalysis";
+import WorkspaceSetup from "./pages/WorkspaceSetup";
+import Settings from "./pages/Settings";
+import PasswordTest from "./pages/PasswordTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +42,14 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route
+                path="/workspace-setup"
+                element={
+                  <ProtectedRoute>
+                    <WorkspaceSetup />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
@@ -54,6 +65,15 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/password-test" element={<PasswordTest />} />
               <Route
                 path="/analytics"
                 element={

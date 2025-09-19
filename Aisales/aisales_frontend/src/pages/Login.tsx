@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Target, Lock, Mail } from 'lucide-react';
@@ -11,7 +12,11 @@ import { Target, Lock, Mail } from 'lucide-react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, user } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+  const { login, isLoading, user, token } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -37,6 +42,73 @@ const Login = () => {
         title: "Login failed",
         description: "Invalid email or password. Please try again.",
       });
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email || !currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Missing fields",
+        description: "Please fill in all fields.",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Password mismatch",
+        description: "New password and confirm password do not match.",
+      });
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/users/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Password reset error:', errorText);
+        throw new Error(errorText || 'Password reset failed');
+      }
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated.",
+      });
+
+      // Clear form
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Password reset error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      toast({
+        variant: "destructive",
+        title: "Password reset failed",
+        description: errorMessage.includes('Current password is incorrect') 
+          ? "Current password is incorrect. Please try again."
+          : errorMessage.includes('User not found')
+          ? "User not found. Please check your email address."
+          : "Please check your information and try again.",
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -105,7 +177,7 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="mt-8 text-center">
+            <div className="mt-8 text-center space-y-4">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
                 <Link 
@@ -115,6 +187,71 @@ const Login = () => {
                   Create Account
                 </Link>
               </p>
+              
+              {/* Forgot Password - Always show */}
+              <div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="text-sm text-muted-foreground hover:text-primary">
+                      Reset Password
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Reset Password</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-email">Email Address</Label>
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Enter your email address"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="current-password">Current Password</Label>
+                        <Input
+                          id="current-password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Enter current password"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-password">New Password</Label>
+                        <Input
+                          id="new-password"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirm New Password</Label>
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                      <Button 
+                        onClick={handlePasswordReset} 
+                        disabled={isResetting}
+                        className="w-full"
+                      >
+                        {isResetting ? 'Updating...' : 'Update Password'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.example.aisales_backend.entity.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -41,6 +42,18 @@ public class JwtTokenProvider {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         return createToken(claims, userDetails.getUsername());
+    }
+
+    public String generateTokenForUser(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
+        if (user.getRole() != null) {
+            claims.put("role", user.getRole().name());
+        }
+        if (user.getWorkspaceId() != null) {
+            claims.put("workspaceId", user.getWorkspaceId());
+        }
+        return createToken(claims, user.getUsername());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

@@ -82,7 +82,12 @@ const Dashboard = () => {
               </Button>
 
               {/* Settings */}
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20"
+                onClick={() => navigate('/settings')}
+              >
                 <Settings className="h-5 w-5" />
               </Button>
 

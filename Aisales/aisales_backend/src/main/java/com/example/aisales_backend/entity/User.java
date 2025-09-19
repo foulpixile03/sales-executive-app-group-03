@@ -57,6 +57,9 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "workspace_id")
+    private Long workspaceId;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
