@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { 
   Brain, 
   TrendingUp, 
@@ -15,7 +16,11 @@ import {
   Loader2,
   BarChart3,
   FileText,
-  MessageSquare
+  MessageSquare,
+  DollarSign,
+  Calendar,
+  User,
+  Building
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -88,6 +93,13 @@ interface SentimentResult {
   updatedAt: string;
 }
 
+interface DealClosureData {
+  isDealClosed: boolean;
+  saleAmount: string;
+  closedDate: string;
+  notes: string;
+}
+
 interface Props {
   uploadedFile: UploadedFile | null;
   selectedContact: Contact | null;
@@ -97,6 +109,7 @@ interface Props {
   sentimentResult: SentimentResult | null;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  onDealClosed?: (dealData: DealClosureData) => void;
 }
 
 const SentimentResults: React.FC<Props> = ({
@@ -107,12 +120,24 @@ const SentimentResults: React.FC<Props> = ({
   onSentimentAnalysis,
   sentimentResult,
   isLoading,
-  setIsLoading
+  setIsLoading,
+  onDealClosed
 }) => {
   const { toast } = useToast();
   const [callDirection, setCallDirection] = useState<'OUTGOING' | 'INCOMING'>('OUTGOING');
   const [summary, setSummary] = useState<string>('');
   const [callTitle, setCallTitle] = useState<string>('');
+  
+  // Deal closure state
+  const [showDealClosure, setShowDealClosure] = useState<boolean>(false);
+  const [dealClosureData, setDealClosureData] = useState<DealClosureData>({
+    isDealClosed: false,
+    saleAmount: '',
+    closedDate: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+    notes: ''
+  });
+  const [isSubmittingDeal, setIsSubmittingDeal] = useState<boolean>(false);
+  const [dealClosureCompleted, setDealClosureCompleted] = useState<boolean>(false);
 
   const handleSaveCallData = async () => {
     if (!uploadedFile || !selectedContact) return;
@@ -316,6 +341,99 @@ const SentimentResults: React.FC<Props> = ({
     if (score >= 60) return 'text-yellow-600';
     if (score >= 40) return 'text-orange-600';
     return 'text-red-600';
+  };
+
+  const handleDealClosureSubmit = async () => {
+    if (!dealClosureData.saleAmount || !dealClosureData.closedDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingDeal(true);
+
+    try {
+      // Create sales log request
+      const salesLogRequest = {
+        customerName: selectedContact ? `${selectedContact.firstName} ${selectedContact.lastName}` : 'Unknown Customer',
+        companyDetails: companyName || selectedContact?.companyName || '',
+        saleAmount: parseFloat(dealClosureData.saleAmount),
+        closedDate: dealClosureData.closedDate,
+        callId: sentimentResult?.id || null,
+        orderId: sentimentResult?.orderId || null,
+        contactId: selectedContact?.id || null,
+        userId: 1, // This should come from auth context
+        notes: dealClosureData.notes
+      };
+
+      const token = localStorage.getItem('finsight_token');
+      const response = await fetch('http://localhost:8080/api/sales-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(salesLogRequest),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create sales log');
+      }
+
+      const salesLogResult = await response.json();
+      
+      toast({
+        title: "Deal Closed Successfully!",
+        description: `Sales log created for $${dealClosureData.saleAmount}`,
+      });
+
+      // Call the parent callback if provided
+      if (onDealClosed) {
+        onDealClosed(dealClosureData);
+      }
+
+      // Mark deal closure as completed
+      setDealClosureCompleted(true);
+
+      // Reset form
+      setDealClosureData({
+        isDealClosed: true,
+        saleAmount: '',
+        closedDate: new Date().toISOString().split('T')[0],
+        notes: ''
+      });
+      setShowDealClosure(false);
+
+    } catch (error) {
+      console.error('Error creating sales log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to close deal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingDeal(false);
+    }
+  };
+
+  const handleDealClosureChange = (field: keyof DealClosureData, value: string | boolean) => {
+    setDealClosureData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleDealNotClosed = () => {
+    // Mark deal closure as completed
+    setDealClosureCompleted(true);
+    
+    // Call the parent callback if provided
+    if (onDealClosed) {
+      onDealClosed({ ...dealClosureData, isDealClosed: false });
+    }
   };
 
   return (
@@ -524,6 +642,150 @@ const SentimentResults: React.FC<Props> = ({
           </Card>
         </div>
       )}
+
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center space-x-2">
+            <DollarSign className="h-5 w-5" />
+            <span>Deal Closure</span>
+          </CardTitle>
+          <CardDescription>
+            Was this call successful? Close the deal and track your revenue.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {dealClosureCompleted ? (
+            <div className="text-center py-8">
+              <div className="flex items-center justify-center space-x-2 text-green-600 mb-2">
+                <CheckCircle className="h-6 w-6" />
+                <span className="text-lg font-semibold">Deal Closure Completed</span>
+              </div>
+              <p className="text-muted-foreground">
+                {dealClosureData.isDealClosed 
+                  ? `Deal closed successfully for $${dealClosureData.saleAmount}` 
+                  : "Deal marked as not closed"}
+              </p>
+            </div>
+          ) : !showDealClosure ? (
+            <div className="flex items-center justify-center space-x-4">
+              <Button
+                onClick={() => setShowDealClosure(true)}
+                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="h-4 w-4" />
+                <span>Yes, Close This Deal</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDealNotClosed}
+              >
+                No, Deal Not Closed
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="saleAmount" className="flex items-center space-x-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Sale Amount *</span>
+                  </Label>
+                  <Input
+                    id="saleAmount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={dealClosureData.saleAmount}
+                    onChange={(e) => handleDealClosureChange('saleAmount', e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="closedDate" className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>Closed Date *</span>
+                  </Label>
+                  <Input
+                    id="closedDate"
+                    type="date"
+                    value={dealClosureData.closedDate}
+                    onChange={(e) => handleDealClosureChange('closedDate', e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customerName" className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span>Customer Name</span>
+                </Label>
+                <Input
+                  id="customerName"
+                  type="text"
+                  value={selectedContact ? `${selectedContact.firstName} ${selectedContact.lastName}` : 'Unknown Customer'}
+                  disabled
+                  className="w-full bg-gray-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyDetails" className="flex items-center space-x-2">
+                  <Building className="h-4 w-4" />
+                  <span>Company Details</span>
+                </Label>
+                <Input
+                  id="companyDetails"
+                  type="text"
+                  value={companyName || selectedContact?.companyName || ''}
+                  disabled
+                  className="w-full bg-gray-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dealNotes">Notes (Optional)</Label>
+                <Textarea
+                  id="dealNotes"
+                  placeholder="Add any additional notes about this deal..."
+                  rows={3}
+                  value={dealClosureData.notes}
+                  onChange={(e) => handleDealClosureChange('notes', e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDealClosure(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDealClosureSubmit}
+                  disabled={isSubmittingDeal || !dealClosureData.saleAmount || !dealClosureData.closedDate}
+                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+                >
+                  {isSubmittingDeal ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Closing Deal...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Close Deal & Create Sales Log</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

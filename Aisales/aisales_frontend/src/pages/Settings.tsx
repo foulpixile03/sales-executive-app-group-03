@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import NavigationBar from '@/components/NavigationBar';
 
 const Settings = () => {
   const { user, token } = useAuth();
@@ -40,8 +41,10 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <NavigationBar />
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Settings</CardTitle>
@@ -82,6 +85,7 @@ const Settings = () => {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import NavigationBar from '@/components/NavigationBar';
 import { 
   Upload, 
   Building2, 
@@ -93,6 +95,7 @@ interface SentimentResult {
 
 const SentimentAnalysis = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentStage, setCurrentStage] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -139,9 +142,25 @@ const SentimentAnalysis = () => {
     });
   };
 
+  const handleDealClosed = (dealData: any) => {
+    if (dealData.isDealClosed) {
+      toast({
+        title: "Deal Closed Successfully!",
+        description: `Revenue: $${dealData.saleAmount}`,
+      });
+    } else {
+      toast({
+        title: "Deal Not Closed",
+        description: "This call did not result in a closed deal.",
+      });
+    }
+  };
+
   const nextStage = () => {
     if (currentStage < 3) {
       setCurrentStage(currentStage + 1);
+    } else if (currentStage === 3) {
+      navigate('/dashboard');
     }
   };
 
@@ -172,18 +191,19 @@ const SentimentAnalysis = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-primary-glow shadow-elegant border-b border-primary/20">
+      <NavigationBar />
+      
+      {/* Page Header */}
+      <div className="bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">Sentiment Analysis</h1>
-              <p className="text-white/80 mt-2">Analyze call recordings and track customer sentiment</p>
+              <h1 className="text-3xl font-bold text-foreground">Sentiment Analysis</h1>
+              <p className="text-muted-foreground mt-2">Analyze call recordings and track customer sentiment</p>
             </div>
             <Button 
               variant="outline" 
               onClick={resetWorkflow}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               Start Over
             </Button>
@@ -278,6 +298,7 @@ const SentimentAnalysis = () => {
                     sentimentResult={sentimentResult}
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
+                    onDealClosed={handleDealClosed}
                   />
                 )}
               </CardContent>
@@ -380,8 +401,7 @@ const SentimentAnalysis = () => {
             onClick={nextStage}
             disabled={
               (currentStage === 1 && !uploadedFile) ||
-              (currentStage === 2 && !selectedContact) ||
-              currentStage === 3
+              (currentStage === 2 && !selectedContact)
             }
             className="flex items-center space-x-2"
           >

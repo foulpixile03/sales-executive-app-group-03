@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './modules/ChatBot.module.css';
 import { useAuth } from '../contexts/AuthContext';
+import NavigationBar from '../components/NavigationBar';
 
 const ChatBot = ({ orderId }) => {
     const [messages, setMessages] = useState([]);
@@ -91,7 +92,9 @@ const ChatBot = ({ orderId }) => {
     };
 
     return (
-        <div className={styles.chatbot}>
+        <div className="min-h-screen bg-background">
+            <NavigationBar />
+            <div className={styles.chatbot}>
             <div className={styles.chatHeader}>
                 <h3>Orbi AI Sales Assistant</h3>
                 <div className={styles.statusIndicator}>
@@ -140,6 +143,7 @@ const ChatBot = ({ orderId }) => {
                 />
                 <button type="submit">Send</button>
             </form>
+            </div>
         </div>
     );
 };
