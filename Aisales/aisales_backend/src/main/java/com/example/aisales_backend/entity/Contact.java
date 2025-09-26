@@ -57,15 +57,15 @@ public class Contact {
     @Builder.Default
     private ContactStatus status = ContactStatus.ACTIVE;
 
+    @Size(max = 100, message = "Company name must not exceed 100 characters")
+    @Column(name = "company_name")
+    private String companyName;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<Call> calls;

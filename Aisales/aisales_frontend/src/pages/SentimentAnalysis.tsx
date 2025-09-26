@@ -61,7 +61,6 @@ interface CallData {
   callDateTime: Date;
   callDirection: 'OUTGOING' | 'INCOMING';
   summary: string;
-  companyId: number;
   contactId: number;
   recordingFilePath: string;
   fileSize: number;
@@ -69,30 +68,43 @@ interface CallData {
 }
 
 interface SentimentResult {
-  callId: number;
+  id: number;
+  callTitle: string;
+  callDateTime: string;
+  recordingFilePath: string;
+  callDirection: 'OUTGOING' | 'INCOMING';
   transcript: string;
+  summary: string;
   sentimentScore: number;
+  sentimentPercentage: number;
   sentimentType: 'VERY_POSITIVE' | 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'VERY_NEGATIVE';
   sentimentAnalysis: string;
-  status: string;
-  message: string;
+  fileSize: number;
+  fileType: string;
+  companyName: string;
+  contactId: number;
+  contactName: string;
+  userId: number;
+  userName: string;
+  orderId?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const SentimentAnalysis = () => {
   const { toast } = useToast();
   const [currentStage, setCurrentStage] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [companyName, setCompanyName] = useState<string>('');
   const [callData, setCallData] = useState<CallData | null>(null);
   const [sentimentResult, setSentimentResult] = useState<SentimentResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const stages = [
-    { id: 1, title: 'Upload Audio', description: 'Upload your call recording', icon: Upload },
-    { id: 2, title: 'Select Company', description: 'Choose or register company', icon: Building2 },
-    { id: 3, title: 'Select Contact', description: 'Choose or register contact', icon: Users },
-    { id: 4, title: 'Analyze & Save', description: 'Analyze sentiment and save', icon: Brain }
+    { id: 1, title: 'Upload Call', description: 'Upload your call recording', icon: Upload },
+    { id: 2, title: 'Contact Info', description: 'Get contact info and optional company name', icon: Users },
+    { id: 3, title: 'Save & Analyze', description: 'Save call info and analyze sentiment', icon: Brain }
   ];
 
   const handleFileUpload = (file: UploadedFile) => {
@@ -100,15 +112,6 @@ const SentimentAnalysis = () => {
     toast({
       title: "File Uploaded",
       description: `Successfully uploaded ${file.file.name}`,
-    });
-  };
-
-  const handleCompanySelect = (company: Company) => {
-    setSelectedCompany(company);
-    setSelectedContact(null); // Reset contact when company changes
-    toast({
-      title: "Company Selected",
-      description: `Selected ${company.companyName}`,
     });
   };
 
@@ -137,7 +140,7 @@ const SentimentAnalysis = () => {
   };
 
   const nextStage = () => {
-    if (currentStage < 4) {
+    if (currentStage < 3) {
       setCurrentStage(currentStage + 1);
     }
   };
@@ -151,8 +154,8 @@ const SentimentAnalysis = () => {
   const resetWorkflow = () => {
     setCurrentStage(1);
     setUploadedFile(null);
-    setSelectedCompany(null);
     setSelectedContact(null);
+    setCompanyName('');
     setCallData(null);
     setSentimentResult(null);
   };
@@ -164,7 +167,7 @@ const SentimentAnalysis = () => {
   };
 
   const getProgressPercentage = () => {
-    return (currentStage / 4) * 100;
+    return (currentStage / 3) * 100;
   };
 
   return (
@@ -195,7 +198,7 @@ const SentimentAnalysis = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Progress</span>
-                <span className="text-sm text-muted-foreground">{currentStage} of 4 stages</span>
+                <span className="text-sm text-muted-foreground">{currentStage} of 3 stages</span>
               </div>
               <Progress value={getProgressPercentage()} className="h-2" />
               
@@ -257,25 +260,19 @@ const SentimentAnalysis = () => {
                 )}
                 
                 {currentStage === 2 && (
-                  <CompanyManagement 
-                    onCompanySelect={handleCompanySelect}
-                    selectedCompany={selectedCompany}
+                  <ContactManagement 
+                    onContactSelect={handleContactSelect}
+                    selectedContact={selectedContact}
+                    onCompanyNameChange={setCompanyName}
+                    companyName={companyName}
                   />
                 )}
                 
                 {currentStage === 3 && (
-                  <ContactManagement 
-                    onContactSelect={handleContactSelect}
-                    selectedContact={selectedContact}
-                    selectedCompany={selectedCompany}
-                  />
-                )}
-                
-                {currentStage === 4 && (
                   <SentimentResults 
                     uploadedFile={uploadedFile}
-                    selectedCompany={selectedCompany}
                     selectedContact={selectedContact}
+                    companyName={companyName}
                     onCallDataSubmit={handleCallDataSubmit}
                     onSentimentAnalysis={handleSentimentAnalysis}
                     sentimentResult={sentimentResult}
@@ -308,24 +305,6 @@ const SentimentAnalysis = () => {
               </Card>
             )}
 
-            {/* Company Summary */}
-            {selectedCompany && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center space-x-2">
-                    <Building2 className="h-5 w-5" />
-                    <span>Selected Company</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <p className="text-sm font-medium">{selectedCompany.companyName}</p>
-                  <div className="flex space-x-2">
-                    <Badge variant="outline">{selectedCompany.type}</Badge>
-                    <Badge variant="secondary">{selectedCompany.industry}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Contact Summary */}
             {selectedContact && (
@@ -342,6 +321,12 @@ const SentimentAnalysis = () => {
                   </p>
                   <p className="text-xs text-muted-foreground">{selectedContact.jobTitle}</p>
                   <Badge variant="outline">{selectedContact.department}</Badge>
+                  {companyName && (
+                    <div className="mt-2">
+                      <p className="text-xs text-muted-foreground">Company:</p>
+                      <p className="text-sm font-medium">{companyName}</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -359,7 +344,7 @@ const SentimentAnalysis = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Sentiment Score:</span>
                     <span className="text-sm font-bold">
-                      {sentimentResult.sentimentScore?.toFixed(2)}
+                      {sentimentResult.sentimentPercentage || sentimentResult.sentimentScore?.toFixed(0)}%
                     </span>
                   </div>
                   <Badge 
@@ -395,14 +380,13 @@ const SentimentAnalysis = () => {
             onClick={nextStage}
             disabled={
               (currentStage === 1 && !uploadedFile) ||
-              (currentStage === 2 && !selectedCompany) ||
-              (currentStage === 3 && !selectedContact) ||
-              currentStage === 4
+              (currentStage === 2 && !selectedContact) ||
+              currentStage === 3
             }
             className="flex items-center space-x-2"
           >
-            <span>{currentStage === 4 ? 'Complete' : 'Next'}</span>
-            {currentStage < 4 && <ArrowRight className="h-4 w-4" />}
+            <span>{currentStage === 3 ? 'Complete' : 'Next'}</span>
+            {currentStage < 3 && <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
       </div>

@@ -12,19 +12,12 @@ import java.util.Optional;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
 
-    List<Contact> findByCompanyId(Long companyId);
-
-    List<Contact> findByCompanyIdAndStatus(Long companyId, Contact.ContactStatus status);
+    List<Contact> findByDepartment(Contact.Department department);
 
     Optional<Contact> findByEmailIgnoreCase(String email);
 
-    @Query("SELECT c FROM Contact c WHERE c.company.id = :companyId AND c.firstName LIKE %:name% OR c.lastName LIKE %:name%")
-    List<Contact> findByCompanyIdAndNameContainingIgnoreCase(@Param("companyId") Long companyId, 
-                                                           @Param("name") String name);
-
-    @Query("SELECT c FROM Contact c WHERE c.company.id = :companyId AND c.department = :department")
-    List<Contact> findByCompanyIdAndDepartment(@Param("companyId") Long companyId, 
-                                             @Param("department") Contact.Department department);
+    @Query("SELECT c FROM Contact c WHERE c.firstName LIKE %:name% OR c.lastName LIKE %:name%")
+    List<Contact> findByNameContainingIgnoreCase(@Param("name") String name);
 
     boolean existsByEmailIgnoreCase(String email);
 }

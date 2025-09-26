@@ -33,6 +33,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/users/register", "/api/users/login", "/api/users/health", "/api/test/public", "/api/health").permitAll()
+                        .requestMatchers("/api/calls/public-webhook/**", "/api/calls/test-n8n-webhook/**").permitAll()  // Allow N8N webhooks without authentication
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/register", "/api/users/login", "/api/users/reset-password", "/api/users/test-password", "/api/users/health", "/api/test/public", "/api/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/invite").hasAuthority("ADMIN")
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")

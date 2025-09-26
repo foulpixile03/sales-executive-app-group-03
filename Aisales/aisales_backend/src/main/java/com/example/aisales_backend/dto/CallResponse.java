@@ -1,10 +1,7 @@
 package com.example.aisales_backend.dto;
 
 import com.example.aisales_backend.entity.Call;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -19,19 +16,25 @@ public class CallResponse {
     private LocalDateTime callDateTime;
     private String recordingFilePath;
     private Call.CallDirection callDirection;
+
     private String summary;
     private String transcript;
-    private Double sentimentScore;
-    private Call.SentimentType sentimentType;
-    private String sentimentAnalysis;
+    private String sentimentLabel;
+    private Integer sentimentPercentage;
+
+
     private Long fileSize;
     private String fileType;
-    private Long companyId;
+
     private String companyName;
     private Long contactId;
     private String contactName;
     private Long userId;
     private String userName;
+
+    private Long orderId;
+    private String orderNumber;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,5 @@
 package com.example.aisales_backend.controller;
 
-import com.example.aisales_backend.exception.FileUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +22,7 @@ import java.util.UUID;
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
 @Slf4j
-public class FileUploadController {
+public class  FileUploadController {
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;

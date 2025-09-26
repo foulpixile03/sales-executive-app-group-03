@@ -22,6 +22,7 @@ public class Call {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ---------------- Core Call Details ----------------
     @NotBlank(message = "Call title is required")
     @Size(min = 2, max = 200, message = "Call title must be between 2 and 200 characters")
     @Column(name = "call_title", nullable = false)
@@ -38,23 +39,28 @@ public class Call {
     @Column(name = "call_direction", nullable = false)
     private CallDirection callDirection;
 
+    // ---------------- Webhook Analysis Data ----------------
     @Size(max = 1000, message = "Summary must not exceed 1000 characters")
     @Column(name = "summary", columnDefinition = "TEXT")
-    private String summary;
+    private String summary;   // Webhook-provided summary
 
     @Column(name = "transcript", columnDefinition = "TEXT")
-    private String transcript;
+    private String transcript;  // Full call transcript
 
-    @Column(name = "sentiment_score")
-    private Double sentimentScore;
+    @Column(name = "sentiment_percentage")
+    private Integer sentimentPercentage;  // Percentage value e.g. 98
 
-    @Enumerated(EnumType.STRING)
-    private SentimentType sentimentType;
+    @Column(name = "sentiment_label", columnDefinition = "TEXT")
+    private String sentimentLabel;
 
-    @Size(max = 2000, message = "Sentiment analysis must not exceed 2000 characters")
-    @Column(name = "sentiment_analysis", columnDefinition = "TEXT")
-    private String sentimentAnalysis;
+    // Store raw webhook response for debugging / audit
+    @Column(name = "webhook_response", columnDefinition = "LONGTEXT")
+    private String webhookResponse;
 
+    @Column(name = "status", nullable = false)
+    private String status; // PENDING, PROCESSING, COMPLETED
+
+    // ---------------- File Info ----------------
     @Column(name = "file_size")
     private Long fileSize;
 
@@ -62,15 +68,16 @@ public class Call {
     @Column(name = "file_type")
     private String fileType;
 
+    // ---------------- Timestamps ----------------
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    // ---------------- Company Information ----------------
+    @Column(name = "company_name")
+    private String companyName;  // Company name from contact or user input
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contact_id", nullable = false)
@@ -80,10 +87,17 @@ public class Call {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    //  Link to Order (because one client can have multiple orders)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    // ---------------- Lifecycle Hooks ----------------
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = "PENDING";
     }
 
     @PreUpdate
@@ -91,11 +105,8 @@ public class Call {
         updatedAt = LocalDateTime.now();
     }
 
+    // ---------------- Enums ----------------
     public enum CallDirection {
         OUTGOING, INCOMING
-    }
-
-    public enum SentimentType {
-        VERY_POSITIVE, POSITIVE, NEUTRAL, NEGATIVE, VERY_NEGATIVE
     }
 }

@@ -15,7 +15,8 @@ import {
   User,
   Phone,
   Mail,
-  Briefcase
+  Briefcase,
+  Building2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,29 +30,22 @@ interface Contact {
   phoneNumber: string;
   department: string;
   status: string;
-  companyId: number;
   companyName: string;
 }
 
-interface Company {
-  id: number;
-  companyName: string;
-  type: 'CLIENT' | 'SUPPLIER' | 'PROSPECT';
-  industry: string;
-  status: string;
-  priority: string;
-}
 
 interface ContactManagementProps {
   onContactSelect: (contact: Contact) => void;
   selectedContact: Contact | null;
-  selectedCompany: Company | null;
+  onCompanyNameChange: (companyName: string) => void;
+  companyName: string;
 }
 
 const ContactManagement: React.FC<ContactManagementProps> = ({
   onContactSelect,
   selectedContact,
-  selectedCompany
+  onCompanyNameChange,
+  companyName
 }) => {
   const { toast } = useToast();
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -70,7 +64,8 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
     email: '',
     phoneNumber: '',
     department: 'PROCUREMENT' as 'PROCUREMENT' | 'IT' | 'FINANCE' | 'OPERATIONS' | 'SALES' | 'MARKETING' | 'HUMAN_RESOURCES' | 'LEGAL' | 'CUSTOMER_SERVICE' | 'OTHER',
-    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'ON_HOLD'
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'ON_HOLD',
+    companyName: ''
   });
 
   const salutations = [
@@ -94,23 +89,21 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
     { value: 'ON_HOLD', label: 'On Hold', color: 'bg-yellow-100 text-yellow-800' }
   ];
 
+
   useEffect(() => {
-    if (selectedCompany) {
-      fetchContacts();
-    }
-  }, [selectedCompany]);
+    fetchAllContacts();
+  }, []);
 
   useEffect(() => {
     filterContacts();
   }, [contacts, searchTerm, selectedDepartment]);
 
-  const fetchContacts = async () => {
-    if (!selectedCompany) return;
 
+  const fetchAllContacts = async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('finsight_token');
-      const response = await fetch(`http://localhost:8080/api/contacts/company/${selectedCompany.id}`, {
+      const response = await fetch('http://localhost:8080/api/contacts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -151,20 +144,30 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
     setFilteredContacts(filtered);
   };
 
+
   const handleCreateContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCompany) return;
+    if (!newContact.firstName.trim() || !newContact.lastName.trim()) return;
 
     setIsCreating(true);
 
     try {
+      const token = localStorage.getItem('finsight_token');
+      
+      // Create the contact with company name
       const contactData = {
-        ...newContact,
-        companyId: selectedCompany.id
+        salutation: newContact.salutation,
+        firstName: newContact.firstName,
+        lastName: newContact.lastName,
+        jobTitle: newContact.jobTitle,
+        email: newContact.email,
+        phoneNumber: newContact.phoneNumber,
+        department: newContact.department,
+        status: newContact.status,
+        companyName: newContact.companyName
       };
 
-      const token = localStorage.getItem('finsight_token');
-      const response = await fetch('http://localhost:8080/api/contacts', {
+      const contactResponse = await fetch('http://localhost:8080/api/contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,8 +176,9 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
         body: JSON.stringify(contactData),
       });
 
-      if (response.ok) {
-        const createdContact = await response.json();
+      if (contactResponse.ok) {
+        const createdContact = await contactResponse.json();
+        
         setContacts(prev => [createdContact, ...prev]);
         onContactSelect(createdContact);
         
@@ -187,7 +191,8 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
           email: '',
           phoneNumber: '',
           department: 'PROCUREMENT',
-          status: 'ACTIVE'
+          status: 'ACTIVE',
+          companyName: ''
         });
 
         toast({
@@ -196,13 +201,13 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
         });
       } else {
         let msg = 'Failed to create contact';
-        const ct = response.headers.get('content-type') || '';
+        const ct = contactResponse.headers.get('content-type') || '';
         try {
           if (ct.includes('application/json')) {
-            const body = await response.json();
+            const body = await contactResponse.json();
             msg = body.error || Object.values(body).join(', ') || msg;
           } else {
-            const text = await response.text();
+            const text = await contactResponse.text();
             msg = text || msg;
           }
         } catch {}
@@ -225,30 +230,27 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
     return statusConfig?.color || 'bg-gray-100 text-gray-800';
   };
 
-  if (!selectedCompany) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center py-8">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Please select a company first</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">
-      {/* Company Info */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="pt-4">
-          <div className="flex items-center space-x-3">
-            <Users className="h-5 w-5 text-primary" />
-            <div>
-              <h4 className="font-semibold">Selected Company</h4>
-              <p className="text-sm text-muted-foreground">{selectedCompany.companyName}</p>
-            </div>
+      {/* Company Name Input */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center space-x-2">
+            <Building2 className="h-5 w-5" />
+            <span>Company Information (Optional)</span>
+          </CardTitle>
+          <CardDescription>Add company name if available</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="companyName">Company Name</Label>
+            <Input
+              id="companyName"
+              value={companyName}
+              onChange={(e) => onCompanyNameChange(e.target.value)}
+              placeholder="Enter company name (optional)"
+            />
           </div>
         </CardContent>
       </Card>
@@ -360,121 +362,139 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
 
         <TabsContent value="create" className="space-y-4">
           <form onSubmit={handleCreateContact} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="salutation">Salutation *</Label>
-                <Select 
-                  value={newContact.salutation} 
-                  onValueChange={(value: any) => 
-                    setNewContact(prev => ({ ...prev, salutation: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {salutations.map(sal => (
-                      <SelectItem key={sal.value} value={sal.value}>
-                        {sal.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Contact Information Section */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Contact Information</h3>
               </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="salutation">Salutation *</Label>
+                  <Select 
+                    value={newContact.salutation} 
+                    onValueChange={(value: any) => 
+                      setNewContact(prev => ({ ...prev, salutation: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salutations.map(sal => (
+                        <SelectItem key={sal.value} value={sal.value}>
+                          {sal.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={newContact.firstName}
+                    onChange={(e) => setNewContact(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="Enter first name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={newContact.lastName}
+                    onChange={(e) => setNewContact(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Enter last name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Input
+                    id="jobTitle"
+                    value={newContact.jobTitle}
+                    onChange={(e) => setNewContact(prev => ({ ...prev, jobTitle: e.target.value }))}
+                    placeholder="Enter job title"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newContact.email}
+                    onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={newContact.phoneNumber}
+                    onChange={(e) => setNewContact(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department *</Label>
+                  <Select 
+                    value={newContact.department} 
+                    onValueChange={(value: any) => 
+                      setNewContact(prev => ({ ...prev, department: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map(dept => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept.replace('_', ' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    value={newContact.status} 
+                    onValueChange={(value: any) => 
+                      setNewContact(prev => ({ ...prev, status: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.map(status => (
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
+                <Label htmlFor="companyName">Company Name (Optional)</Label>
                 <Input
-                  id="firstName"
-                  value={newContact.firstName}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, firstName: e.target.value }))}
-                  placeholder="Enter first name"
-                  required
+                  id="companyName"
+                  value={newContact.companyName}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, companyName: e.target.value }))}
+                  placeholder="Enter company name"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input
-                  id="lastName"
-                  value={newContact.lastName}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, lastName: e.target.value }))}
-                  placeholder="Enter last name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="jobTitle">Job Title</Label>
-                <Input
-                  id="jobTitle"
-                  value={newContact.jobTitle}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, jobTitle: e.target.value }))}
-                  placeholder="Enter job title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newContact.email}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="Enter email address"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input
-                  id="phoneNumber"
-                  value={newContact.phoneNumber}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                  placeholder="Enter phone number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="department">Department *</Label>
-                <Select 
-                  value={newContact.department} 
-                  onValueChange={(value: any) => 
-                    setNewContact(prev => ({ ...prev, department: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map(dept => (
-                      <SelectItem key={dept} value={dept}>
-                        {dept.replace('_', ' ')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={newContact.status} 
-                  onValueChange={(value: any) => 
-                    setNewContact(prev => ({ ...prev, status: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statuses.map(status => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
@@ -484,15 +504,15 @@ const ContactManagement: React.FC<ContactManagementProps> = ({
               className="w-full"
             >
               {isCreating ? (
-                <>
+                <div className="flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Creating Contact...
-                </>
+                </div>
               ) : (
-                <>
+                <div className="flex items-center">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Contact
-                </>
+                </div>
               )}
             </Button>
           </form>

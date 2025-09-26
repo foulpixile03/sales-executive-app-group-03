@@ -23,7 +23,6 @@ public class ContactResponse {
     private String phoneNumber;
     private Contact.Department department;
     private Contact.ContactStatus status;
-    private Long companyId;
     private String companyName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

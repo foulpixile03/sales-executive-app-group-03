@@ -39,8 +39,9 @@ public class ContactRequest {
     @NotNull(message = "Department is required")
     private Contact.Department department;
 
+    @Builder.Default
     private Contact.ContactStatus status = Contact.ContactStatus.ACTIVE;
 
-    @NotNull(message = "Company ID is required")
-    private Long companyId;
+    @Size(max = 100, message = "Company name must not exceed 100 characters")
+    private String companyName;
 }

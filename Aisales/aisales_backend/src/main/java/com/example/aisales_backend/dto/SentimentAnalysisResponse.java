@@ -14,9 +14,8 @@ public class SentimentAnalysisResponse {
 
     private Long callId;
     private String transcript;
-    private Double sentimentScore;
-    private Call.SentimentType sentimentType;
-    private String sentimentAnalysis;
+    private Double sentimentPercentage;
+    private String sentimentLabel;
     private String status;
-    private String message;
+    private String summary;
 }
