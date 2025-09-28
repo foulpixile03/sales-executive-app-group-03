@@ -5,5 +5,5 @@ import com.example.aisales_backend.dto.chat.ChatRequestDto;
 import com.example.aisales_backend.dto.chat.ChatResponseDto;
 
 public interface IChatService {
-    ChatResponseDto ask(String orderId, ChatRequestDto request);
+    ChatResponseDto ask(Long orderId, ChatRequestDto request);
 }

@@ -25,14 +25,14 @@ public class N8nWebhookService {
     }
 
 
-    public String triggerForOrder(String orderId, String question) {
-        CallRecording rec = callRepo.findTopByOrderIdOrderByCreatedAtDesc(orderId)
+    public String triggerForOrder(Long orderId, String question) {
+        CallRecording rec = callRepo.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("No call recording for order: " + orderId));
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("orderId", orderId);
         payload.put("question", question);
-        payload.put("transcript", rec.getTranscript());
+//        payload.put("transcript", rec.getTranscript());
 
         ResponseEntity<String> resp = n8nClient.triggerWebhook("", payload);
 

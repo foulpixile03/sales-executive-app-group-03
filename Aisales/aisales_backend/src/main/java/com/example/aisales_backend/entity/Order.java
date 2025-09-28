@@ -29,5 +29,4 @@ public class Order {
     private Contact contact;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Call> calls;
 }

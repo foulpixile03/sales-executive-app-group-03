@@ -22,7 +22,7 @@ public class ChatController {
 
 
     @PostMapping("/{orderId}/ask")
-    public ResponseEntity<ChatResponseDto> ask(@PathVariable String orderId, @RequestBody ChatRequestDto request) {
+    public ResponseEntity<ChatResponseDto> ask(@PathVariable Long orderId, @RequestBody ChatRequestDto request) {
         ChatResponseDto resp = chatService.ask(orderId, request);
         return ResponseEntity.ok(resp);
     }

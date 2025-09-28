@@ -4,27 +4,38 @@ import com.example.aisales_backend.entity.Call;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface CallRepository extends JpaRepository<Call, Long> {
-    
-    // Find calls by contact ID
-    List<Call> findByContactId(Long contactId);
-    
-    // Find calls by order ID
-    List<Call> findByOrderId(Long orderId);
-    
-    // Find calls by user ID
+
     List<Call> findByUserId(Long userId);
 
-    List<Call> findBySentimentLabel(String sentimentLabel);
+    List<Call> findByCompanyId(Long companyId);
 
-    // Find recent calls for a contact
-    @Query("SELECT c FROM Call c WHERE c.contact.id = :contactId ORDER BY c.callDateTime DESC")
-    List<Call> findRecentCallsByContactId(@Param("contactId") Long contactId);
-    
-    // Find call by ID with eager loading of relationships
-    @Query("SELECT c FROM Call c LEFT JOIN FETCH c.contact LEFT JOIN FETCH c.user LEFT JOIN FETCH c.order WHERE c.id = :callId")
-    Call findByIdWithRelationships(@Param("callId") Long callId);
+    List<Call> findByContactId(Long contactId);
+
+    List<Call> findByUserIdOrderByCallDateTimeDesc(Long userId);
+
+    @Query("SELECT c FROM Call c WHERE c.user.id = :userId AND c.callDateTime BETWEEN :startDate AND :endDate")
+    List<Call> findByUserIdAndCallDateTimeBetween(@Param("userId") Long userId, 
+                                                 @Param("startDate") LocalDateTime startDate, 
+                                                 @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT c FROM Call c WHERE c.company.id = :companyId AND c.sentimentType = :sentimentType")
+    List<Call> findByCompanyIdAndSentimentType(@Param("companyId") Long companyId, 
+                                             @Param("sentimentType") Call.SentimentType sentimentType);
+
+    @Query("SELECT c FROM Call c WHERE c.user.id = :userId AND c.sentimentType = :sentimentType")
+    List<Call> findByUserIdAndSentimentType(@Param("userId") Long userId, 
+                                          @Param("sentimentType") Call.SentimentType sentimentType);
+
+    @Query("SELECT AVG(c.sentimentScore) FROM Call c WHERE c.company.id = :companyId")
+    Double findAverageSentimentScoreByCompanyId(@Param("companyId") Long companyId);
+
+    @Query("SELECT AVG(c.sentimentScore) FROM Call c WHERE c.user.id = :userId")
+    Double findAverageSentimentScoreByUserId(@Param("userId") Long userId);
 }

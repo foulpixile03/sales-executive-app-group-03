@@ -24,7 +24,7 @@ public class ChatService implements IChatService {
 
 
     @Override
-    public ChatResponseDto ask(String orderId, ChatRequestDto request) {
+    public ChatResponseDto ask(Long orderId, ChatRequestDto request) {
         String raw = n8nWebhookService.triggerForOrder(orderId, request.getQuestion());
 // Try to parse a structured answer out of the webhook response if possible
         try {
