@@ -1,21 +1,27 @@
 package com.example.aisales_backend.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.aisales_backend.dto.SalesLogRequest;
 import com.example.aisales_backend.dto.SalesLogResponse;
-import com.example.aisales_backend.entity.*;
+import com.example.aisales_backend.entity.Call;
+import com.example.aisales_backend.entity.Contact;
+import com.example.aisales_backend.entity.Order;
+import com.example.aisales_backend.entity.SalesLog;
+import com.example.aisales_backend.entity.User;
 import com.example.aisales_backend.repository.CallRepository;
 import com.example.aisales_backend.repository.ContactRepository;
 import com.example.aisales_backend.repository.OrderRepository;
 import com.example.aisales_backend.repository.SalesLogRepository;
 import com.example.aisales_backend.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

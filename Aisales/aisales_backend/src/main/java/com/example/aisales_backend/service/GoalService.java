@@ -48,7 +48,8 @@ public class GoalService {
                 goal.getDescription(),
                 goal.getTargetRevenue(),
                 goal.getCurrentProgress(),
-                goal.getDeadline(),
+                goal.getStartDate(),
+                goal.getEndDate(),
                 goal.getStatus(),
                 goal.getCompany(),
                 goal.getPriority()
@@ -80,7 +81,8 @@ public class GoalService {
         goal.setDescription(goalRequest.getDescription());
         goal.setTargetRevenue(goalRequest.getTargetRevenue());
         goal.setCurrentProgress(goalRequest.getCurrentProgress() == null ? 0.0 : goalRequest.getCurrentProgress());
-        goal.setDeadline(goalRequest.getDeadline());
+        goal.setStartDate(goalRequest.getStartDate());
+        goal.setEndDate(goalRequest.getEndDate());
         goal.setCompany(goalRequest.getCompany());
         goal.setPriority(goalRequest.getPriority());
         goal.setStatus(determineStatus(goal.getCurrentProgress(), goal.getTargetRevenue()));
@@ -100,7 +102,8 @@ public class GoalService {
             goal.setDescription(goalRequest.getDescription());
             goal.setTargetRevenue(goalRequest.getTargetRevenue());
             goal.setCurrentProgress(goalRequest.getCurrentProgress() == null ? goal.getCurrentProgress() : goalRequest.getCurrentProgress());
-            goal.setDeadline(goalRequest.getDeadline());
+            goal.setStartDate(goalRequest.getStartDate());
+            goal.setEndDate(goalRequest.getEndDate());
             goal.setCompany(goalRequest.getCompany());
             goal.setPriority(goalRequest.getPriority());
             goal.setStatus(determineStatus(goal.getCurrentProgress(), goal.getTargetRevenue()));

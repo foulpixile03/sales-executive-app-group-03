@@ -1,5 +1,6 @@
 package com.example.aisales_backend.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +26,15 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     @Query("SELECT AVG((g.currentProgress / g.targetRevenue) * 100) FROM Goal g WHERE g.user = :user")
     Double averageProgressByUser(@Param("user") User user);
-}
 
+    @Query("SELECT g FROM Goal g WHERE g.user = :user AND g.id != :excludeId AND " +
+            "((g.startDate <= :endDate AND g.endDate >= :startDate))")
+    List<Goal> findOverlappingGoals(@Param("user") User user,
+                                    @Param("startDate") LocalDate startDate,
+                                    @Param("endDate") LocalDate endDate,
+                                    @Param("excludeId") Long excludeId);
+
+    @Query("SELECT g FROM Goal g WHERE g.user = :user AND g.startDate <= CURRENT_DATE AND g.endDate >= CURRENT_DATE")
+    List<Goal> findActiveGoalsByUser(@Param("user") User user);
+}
 

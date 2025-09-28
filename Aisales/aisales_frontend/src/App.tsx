@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ChatBot from "./pages/ChatBot";
 import Analytics from "./pages/Analytics";
+import AnalyticsSimple from "./pages/AnalyticsSimple";
+import GoalDetail from "./pages/GoalDetail";
 import SentimentAnalysis from "./pages/SentimentAnalysis";
 import WorkspaceSetup from "./pages/WorkspaceSetup";
 import Settings from "./pages/Settings";
@@ -83,7 +85,15 @@ const App = () => (
                 path="/analytics"
                 element={
                   <ProtectedRoute>
-                    <Analytics />
+                    <AnalyticsSimple />
+                  </ProtectedRoute>
+                }
+                />
+              <Route
+                path="/goals/:id"
+                element={
+                  <ProtectedRoute>
+                    <GoalDetail />
                   </ProtectedRoute>
                 }
               />

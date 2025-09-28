@@ -17,7 +17,9 @@ public class GoalRequest {
     @PositiveOrZero
     private Double currentProgress;
     @NotNull
-    private LocalDate deadline;
+    private LocalDate startDate;
+    @NotNull
+    private LocalDate endDate;
     @NotBlank
     private String company;
     @NotBlank
@@ -26,12 +28,13 @@ public class GoalRequest {
     public GoalRequest() {}
 
     public GoalRequest(String name, String description, Double targetRevenue,
-                       Double currentProgress, LocalDate deadline, String company, String priority) {
+                       Double currentProgress, LocalDate startDate, LocalDate endDate, String company, String priority) {
         this.name = name;
         this.description = description;
         this.targetRevenue = targetRevenue;
         this.currentProgress = currentProgress;
-        this.deadline = deadline;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.company = company;
         this.priority = priority;
     }
@@ -48,8 +51,11 @@ public class GoalRequest {
     public Double getCurrentProgress() { return currentProgress; }
     public void setCurrentProgress(Double currentProgress) { this.currentProgress = currentProgress; }
 
-    public LocalDate getDeadline() { return deadline; }
-    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
     public String getCompany() { return company; }
     public void setCompany(String company) { this.company = company; }

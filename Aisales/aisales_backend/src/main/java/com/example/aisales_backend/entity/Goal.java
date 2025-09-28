@@ -21,7 +21,8 @@ public class Goal {
     private String description;
     private Double targetRevenue;
     private Double currentProgress;
-    private LocalDate deadline;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String status;
     private String company;
     private String priority; // e.g., High, Medium, Low
@@ -33,13 +34,15 @@ public class Goal {
     public Goal() {}
 
     public Goal(String name, String description, Double targetRevenue,
-                Double currentProgress, LocalDate deadline, String status, User user,
+                Double currentProgress, LocalDate startDate, LocalDate endDate, 
+                String status, User user,
                 String company, String priority) {
         this.name = name;
         this.description = description;
         this.targetRevenue = targetRevenue;
         this.currentProgress = currentProgress;
-        this.deadline = deadline;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.status = status;
         this.user = user;
         this.company = company;
@@ -61,8 +64,11 @@ public class Goal {
     public Double getCurrentProgress() { return currentProgress; }
     public void setCurrentProgress(Double currentProgress) { this.currentProgress = currentProgress; }
 
-    public LocalDate getDeadline() { return deadline; }
-    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
