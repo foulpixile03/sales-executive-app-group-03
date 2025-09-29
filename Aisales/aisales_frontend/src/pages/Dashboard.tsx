@@ -48,18 +48,23 @@ const Dashboard = () => {
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-white/80 hover:bg-white/20 hover:text-white"
-                  onClick={() => window.location.href = '/sentiment-analysis'}
+                  onClick={() => navigate('/sentiment-analysis')}
                 >
                   <Users className="h-4 w-4 mr-2" />
                   Sentiment
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80 hover:bg-white/20 hover:text-white">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:bg-white/20 hover:text-white"
+                  onClick={() => navigate('/call-history')}
+                >
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
+                  History
                 </Button>
                 <Button
                   variant="ghost"

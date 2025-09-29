@@ -11,7 +11,13 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ChatBot from "./pages/ChatBot";
 import Analytics from "./pages/Analytics";
+import AnalyticsSimple from "./pages/AnalyticsSimple";
+import GoalDetail from "./pages/GoalDetail";
 import SentimentAnalysis from "./pages/SentimentAnalysis";
+import WorkspaceSetup from "./pages/WorkspaceSetup";
+import Settings from "./pages/Settings";
+import PasswordTest from "./pages/PasswordTest";
+import CallHistory from "./pages/CallHistory";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,13 +37,26 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AuthProvider>
           <AppLayout>
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route
+                path="/workspace-setup"
+                element={
+                  <ProtectedRoute>
+                    <WorkspaceSetup />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={
@@ -47,18 +66,43 @@ const App = () => (
                 }
               />
               <Route
-                path="/chat"
+                path="/chat/:orderId"
                 element={
                   <ProtectedRoute>
-                    <ChatBot orderId="123" />
+                    <ChatBot />
                   </ProtectedRoute>
                 }
               />
               <Route
+                path="/call-history"
+                element={
+                  <ProtectedRoute>
+                    <CallHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/password-test" element={<PasswordTest />} />
+              <Route
                 path="/analytics"
                 element={
                   <ProtectedRoute>
-                    <Analytics />
+                    <AnalyticsSimple />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/goals/:id"
+                element={
+                  <ProtectedRoute>
+                    <GoalDetail />
                   </ProtectedRoute>
                 }
               />

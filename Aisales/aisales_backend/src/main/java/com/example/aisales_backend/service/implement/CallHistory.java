@@ -1,9 +1,9 @@
 package com.example.aisales_backend.service.implement;
 
 import com.example.aisales_backend.dto.history.CallDto;
-import com.example.aisales_backend.entity.CallRecording;
+import com.example.aisales_backend.entity.Call;
 import com.example.aisales_backend.entity.Contact;
-import com.example.aisales_backend.repository.CallRepo;
+import com.example.aisales_backend.repository.CallRepository;
 import com.example.aisales_backend.service.interfaces.ICallService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,14 +15,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CallHistory implements ICallService {
 
-    private final CallRepo callRepository;
+    private final CallRepository callRepository;
 
     @Override
     public List<CallDto> getAllCallsLatestFirst() {
-        List<CallRecording> calls = callRepository.findAllWithContactOrderByCallDateTimeDesc();
+        List<Call> calls = callRepository.findAllWithContactOrderByCallDateTimeDesc();
         List<CallDto> result = new ArrayList<>();
 
-        for (CallRecording call : calls) {
+        for (Call call : calls) {
             CallDto dto = new CallDto();
 
             dto.setId(call.getId());
