@@ -22,8 +22,21 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> {
+            var user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            
+            // Log user details for debugging
+            System.out.println("UserDetailsService loaded user: " + user.getEmail());
+            System.out.println("User role: " + user.getRole());
+            System.out.println("User enabled: " + user.isEnabled());
+            System.out.println("User account non-expired: " + user.isAccountNonExpired());
+            System.out.println("User account non-locked: " + user.isAccountNonLocked());
+            System.out.println("User credentials non-expired: " + user.isCredentialsNonExpired());
+            System.out.println("User authorities: " + user.getAuthorities());
+            
+            return user;
+        };
     }
 
     @Bean

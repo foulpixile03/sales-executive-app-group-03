@@ -53,11 +53,16 @@ public class WorkspaceService {
         User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin user not found"));
 
+        if (admin.getCompany() == null) {
+            throw new RuntimeException("Admin must have a company to create workspace");
+        }
+
         Workspace workspace = Workspace.builder()
                 .companyName(request.getCompanyName())
                 .industry(request.getIndustry())
                 .address(request.getAddress())
                 .createdBy(admin)
+                .company(admin.getCompany())
                 .build();
 
         Workspace saved = workspaceRepository.save(workspace);
@@ -65,7 +70,7 @@ public class WorkspaceService {
         admin.setWorkspaceId(saved.getId());
         userRepository.save(admin);
 
-        log.info("Workspace {} created by admin {}", saved.getId(), admin.getEmail());
+        log.info("Workspace {} created by admin {} for company {}", saved.getId(), admin.getEmail(), admin.getCompany().getCompanyName());
 
         return WorkspaceResponse.builder()
                 .id(saved.getId())

@@ -20,4 +20,10 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findByNameContainingIgnoreCase(@Param("name") String name);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    List<Contact> findByCompanyId(Long companyId);
+
+    Optional<Contact> findByIdAndCompanyId(Long id, Long companyId);
+
+    boolean existsByEmailIgnoreCaseAndCompanyId(String email, Long companyId);
 }

@@ -11,14 +11,14 @@ const WorkspaceSetup = () => {
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
   const [address, setAddress] = useState('');
-  const { token } = useAuth();
+  const { token, refreshUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8080/api/workspaces', {
+      const response = await fetch('http://localhost:8080/api/users/create-company', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,10 +28,16 @@ const WorkspaceSetup = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create workspace');
+        throw new Error('Failed to create company');
       }
 
-      toast({ title: 'Workspace created', description: 'Your workspace has been set up.' });
+      const userData = await response.json();
+      
+      // Update the user data in localStorage and context
+      localStorage.setItem('finsight_user', JSON.stringify(userData));
+      refreshUser();
+      
+      toast({ title: 'Company created', description: 'Your company has been set up successfully.' });
       navigate('/dashboard');
     } catch (err) {
       toast({ variant: 'destructive', title: 'Creation failed', description: 'Please try again.' });
@@ -43,8 +49,8 @@ const WorkspaceSetup = () => {
       <div className="w-full max-w-xl">
         <Card className="border-0">
           <CardHeader>
-            <CardTitle>Workspace Setup</CardTitle>
-            <CardDescription>Provide basic details to get started</CardDescription>
+            <CardTitle>Company Setup</CardTitle>
+            <CardDescription>Create your company to get started with Vocalyx</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -60,7 +66,7 @@ const WorkspaceSetup = () => {
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full">Create Workspace</Button>
+              <Button type="submit" className="w-full">Create Company</Button>
             </form>
           </CardContent>
         </Card>

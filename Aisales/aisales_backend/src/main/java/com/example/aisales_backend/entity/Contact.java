@@ -61,6 +61,10 @@ public class Contact {
     @Column(name = "company_name")
     private String companyName;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

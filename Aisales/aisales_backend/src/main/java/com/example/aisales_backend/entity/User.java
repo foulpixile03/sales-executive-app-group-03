@@ -45,7 +45,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -60,6 +60,10 @@ public class User implements UserDetails {
     @Column(name = "workspace_id")
     private Long workspaceId;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -73,6 +77,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null) {
+            return List.of(new SimpleGrantedAuthority("USER"));
+        }
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 

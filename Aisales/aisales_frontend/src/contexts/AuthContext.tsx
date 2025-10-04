@@ -9,6 +9,8 @@ interface User {
   role: string;
   createdAt: string;
   workspaceId?: number | null;
+  companyId?: number | null;
+  companyName?: string | null;
 }
 
 interface AuthContextType {
@@ -17,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
+  refreshUser: () => void;
   isLoading: boolean;
 }
 
@@ -87,6 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         role: payload.role || 'USER',
         createdAt: new Date().toISOString(),
         workspaceId: typeof payload.workspaceId === 'number' ? payload.workspaceId : (payload.workspaceId ?? null),
+        companyId: typeof payload.companyId === 'number' ? payload.companyId : (payload.companyId ?? null),
+        companyName: payload.companyName || null,
       };
 
       setToken(token);
@@ -95,7 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('finsight_token', token);
       localStorage.setItem('finsight_user', JSON.stringify(userData));
       
-      if (userData.role === 'ADMIN' && (userData.workspaceId === null || userData.workspaceId === undefined)) {
+      if (userData.role === 'ADMIN' && (userData.companyId === null || userData.companyId === undefined)) {
         navigate('/workspace-setup');
       } else {
         navigate('/dashboard');
@@ -141,12 +146,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     navigate('/login');
   };
 
+  const refreshUser = () => {
+    const storedUser = localStorage.getItem('finsight_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  };
+
   const value: AuthContextType = {
     user,
     token,
     login,
     register,
     logout,
+    refreshUser,
     isLoading,
   };
 

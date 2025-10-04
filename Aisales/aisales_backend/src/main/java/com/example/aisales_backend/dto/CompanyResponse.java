@@ -1,6 +1,5 @@
 package com.example.aisales_backend.dto;
 
-import com.example.aisales_backend.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,15 +11,12 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class CompanyResponse {
 
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private Role role;
-    private LocalDateTime createdAt;
-    private Long companyId;
     private String companyName;
-    private String status;
+    private String industry;
+    private String address;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

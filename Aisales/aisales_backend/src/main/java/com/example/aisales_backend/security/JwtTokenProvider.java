@@ -47,12 +47,26 @@ public class JwtTokenProvider {
     public String generateTokenForUser(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
+        claims.put("firstName", user.getFirstName());
+        claims.put("lastName", user.getLastName());
         if (user.getRole() != null) {
             claims.put("role", user.getRole().name());
         }
         if (user.getWorkspaceId() != null) {
             claims.put("workspaceId", user.getWorkspaceId());
         }
+        
+        // Safely handle company information
+        try {
+            if (user.getCompany() != null) {
+                claims.put("companyId", user.getCompany().getId());
+                claims.put("companyName", user.getCompany().getCompanyName());
+            }
+        } catch (Exception e) {
+            log.warn("Could not access company information for user {}: {}", user.getEmail(), e.getMessage());
+            // Don't add company information if there's an issue
+        }
+        
         return createToken(claims, user.getUsername());
     }
 

@@ -22,12 +22,12 @@ public class ContactService {
 
     private final ContactRepository contactRepository;
 
-    public ContactResponse createContact(ContactRequest request) {
-        log.info("Creating new contact: {} {}", request.getFirstName(), request.getLastName());
+    public ContactResponse createContact(ContactRequest request, Long companyId) {
+        log.info("Creating new contact: {} {} for company: {}", request.getFirstName(), request.getLastName(), companyId);
 
-        // Check if email already exists (if provided)
+        // Check if email already exists within the same company (if provided)
         if (request.getEmail() != null && !request.getEmail().isEmpty() &&
-            contactRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            contactRepository.existsByEmailIgnoreCaseAndCompanyId(request.getEmail(), companyId)) {
             throw new DuplicateEntityException("Contact", "email", request.getEmail());
         }
 
@@ -41,38 +41,39 @@ public class ContactService {
                 .department(request.getDepartment())
                 .status(request.getStatus())
                 .companyName(request.getCompanyName())
+                .company(com.example.aisales_backend.entity.Company.builder().id(companyId).build())
                 .build();
 
         Contact savedContact = contactRepository.save(contact);
-        log.info("Contact created successfully: {}", savedContact.getId());
+        log.info("Contact created successfully: {} for company: {}", savedContact.getId(), companyId);
 
         return mapToContactResponse(savedContact);
     }
 
-    public List<ContactResponse> getAllContacts() {
-        log.info("Fetching all contacts");
-        return contactRepository.findAll().stream()
+    public List<ContactResponse> getAllContacts(Long companyId) {
+        log.info("Fetching all contacts for company: {}", companyId);
+        return contactRepository.findByCompanyId(companyId).stream()
                 .map(this::mapToContactResponse)
                 .collect(Collectors.toList());
     }
 
-    public ContactResponse getContactById(Long id) {
-        log.info("Fetching contact by ID: {}", id);
-        Contact contact = contactRepository.findById(id)
+    public ContactResponse getContactById(Long id, Long companyId) {
+        log.info("Fetching contact by ID: {} for company: {}", id, companyId);
+        Contact contact = contactRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Contact", id));
         return mapToContactResponse(contact);
     }
 
 
-    public ContactResponse updateContact(Long id, ContactRequest request) {
-        log.info("Updating contact with ID: {}", id);
-        Contact contact = contactRepository.findById(id)
+    public ContactResponse updateContact(Long id, ContactRequest request, Long companyId) {
+        log.info("Updating contact with ID: {} for company: {}", id, companyId);
+        Contact contact = contactRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Contact", id));
 
-        // Check if email already exists (if provided and different from current)
+        // Check if email already exists within the same company (if provided and different from current)
         if (request.getEmail() != null && !request.getEmail().isEmpty() &&
             !request.getEmail().equalsIgnoreCase(contact.getEmail()) &&
-            contactRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            contactRepository.existsByEmailIgnoreCaseAndCompanyId(request.getEmail(), companyId)) {
             throw new DuplicateEntityException("Contact", "email", request.getEmail());
         }
 
@@ -87,18 +88,18 @@ public class ContactService {
         contact.setCompanyName(request.getCompanyName());
 
         Contact updatedContact = contactRepository.save(contact);
-        log.info("Contact updated successfully: {}", updatedContact.getId());
+        log.info("Contact updated successfully: {} for company: {}", updatedContact.getId(), companyId);
 
         return mapToContactResponse(updatedContact);
     }
 
-    public void deleteContact(Long id) {
-        log.info("Deleting contact with ID: {}", id);
-        if (!contactRepository.existsById(id)) {
+    public void deleteContact(Long id, Long companyId) {
+        log.info("Deleting contact with ID: {} for company: {}", id, companyId);
+        if (!contactRepository.findByIdAndCompanyId(id, companyId).isPresent()) {
             throw new EntityNotFoundException("Contact", id);
         }
         contactRepository.deleteById(id);
-        log.info("Contact deleted successfully: {}", id);
+        log.info("Contact deleted successfully: {} for company: {}", id, companyId);
     }
 
     private ContactResponse mapToContactResponse(Contact contact) {
